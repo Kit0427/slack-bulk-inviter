@@ -82,7 +82,7 @@ def kwargs_lazy(respond, command):
 
     respond(f"✅ 完了しました！\n新しく招待成功: {success_count} チャンネル\n参加済みスキップ: {skip_count} チャンネル")
 
-app.command("/bulk-invite")(
+app.command("/メンバー一括追加")(
     ack=kwargs_ack,
     lazy=[kwargs_lazy]
 )
