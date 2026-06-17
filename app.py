@@ -15,7 +15,7 @@ user_client = WebClient(token=os.environ.get("SLACK_USER_TOKEN"))
 # 対象チャンネルのリスト
 TARGET_CHANNELS = [
     "27卒-hr稼働者チャンネル", "27卒member-all", "27卒pitch会", "27卒シラバス共有チャンネル",
-    "27卒関東勢", "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
+    "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
     "80_左野random", "99_random", "general", "giver宣言発信チャンネル",
     "info_共有", "info_重要事項連絡", "tmp-expo参加者", "t進ハイスクール",
     "zp-石田-random", "zp-中谷random", "zp-木村-random", "zp-澤口-random",
@@ -31,8 +31,8 @@ def kwargs_ack(ack):
 def kwargs_lazy(respond, command):
     text = command.get("text", "").strip()
     
-    # 入力からユーザーIDを抜き出す
-    match = re.search(r'<@(U[A-Z0-9]+)\|', text)
+    # 【修正箇所】入力からユーザーIDを柔軟に抜き出すように変更
+    match = re.search(r'<@(U[A-Z0-9]+)', text)
     if match:
         target_user_id = match.group(1)
     else:
