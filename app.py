@@ -71,5 +71,6 @@ def handle_bulk_invite(ack, respond, command):
     respond(f"✅ 完了しました！\n新しく招待成功: {success_count} チャンネル\n参加済みスキップ: {skip_count} チャンネル")
 
 # クラウド上で外部からの通信を受け取れるようにする設定
+# 修正後
 if __name__ == "__main__":
-    app.start(port=int(os.environ.get("PORT", 3000)), host="0.0.0.0")
+    app.start(port=int(os.environ.get("PORT", 3000)))
