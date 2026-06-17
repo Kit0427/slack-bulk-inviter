@@ -4,15 +4,12 @@ from slack_bolt import App
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-# クラウド環境に設定した「鍵」を読み込む
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
-# 招待自体は権限の強いユーザーアカウント(xoxp)で実行
 user_client = WebClient(token=os.environ.get("SLACK_USER_TOKEN"))
 
-# 対象チャンネルのリスト
 TARGET_CHANNELS = [
     "27卒-hr稼働者チャンネル", "27卒member-all", "27卒pitch会", "27卒シラバス共有チャンネル",
     "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
@@ -23,20 +20,34 @@ TARGET_CHANNELS = [
     "遺伝志発信チャンネル", "気づきtips-giveチャンネル", "山田悠斗_遺伝志発信channel"
 ]
 
-# 1. 【3秒ルール対策】Slackに「受け取ったよ」と一瞬で即レスを返す関数
 def kwargs_ack(ack):
     ack()
 
-# 2. 【重い処理】バックグラウンド（裏側）で時間をかけて実行する関数
 def kwargs_lazy(respond, command):
     text = command.get("text", "").strip()
     
-    # 【修正箇所】入力からユーザーIDを柔軟に抜き出すように変更
-    match = re.search(r'<@(U[A-Z0-9]+)', text)
+    # 【超確実な修正】届いた文字列の中から「U」から始まる大文字英数字のIDだけをダイレクトに探す
+    match = re.search(r'U[A-Z0-9]{8,11}', text)
+    
     if match:
-        target_user_id = match.group(1)
+        target_user_id = match.group(0)
     else:
-        respond(f"⚠️ エラー: 招待したいメンバーをメンション（青いハイライト）で指定してください。\n（プログラムに届いた文字: `{text}`）")
+        # 万が一IDが取れなかった場合は、ベタ打ちの名前から探す（バックアップ機能）
+        input_name = text.replace("@", "").strip()
+        target_user_id = None
+        if input_name:
+            try:
+                users_res = user_client.users_list()
+                for member in users_res.get("members", []):
+                    if member.get("name") == input_name or member.get("profile", {}).get("display_name") == input_name:
+                        target_user_id = member.get("id")
+                        break
+            except Exception:
+                respond("❌ メンバー一覧の取得に失敗しました。")
+                return
+
+    if not target_user_id:
+        respond(f"⚠️ エラー: メンバーを特定できませんでした。（届いた文字: `{text}`）")
         return
 
     respond(f"🏃‍♂️ <@{target_user_id}> を対象チャンネルへ一括招待しています...少しお待ちください。")
@@ -71,7 +82,6 @@ def kwargs_lazy(respond, command):
 
     respond(f"✅ 完了しました！\n新しく招待成功: {success_count} チャンネル\n参加済みスキップ: {skip_count} チャンネル")
 
-# Slack Boltに「即レス用」と「裏での処理用」の関数をセットする
 app.command("/bulk-invite")(
     ack=kwargs_ack,
     lazy=[kwargs_lazy]
