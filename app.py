@@ -14,7 +14,7 @@ TARGET_CHANNELS = [
     "27卒-hr稼働者チャンネル", "27卒member-all", "27卒pitch会", "27卒シラバス共有チャンネル",
     "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
     "80_左野random", "99_random", "general", "giver宣言発信チャンネル",
-    "info_共有", "info_重要事項連絡", "tmp-expo参加者", "t進ハイスクール",
+    "info_共有", "info_重要事項連絡", "t進ハイスクール",
     "zp-石田-random", "zp-中谷random", "zp-木村-random", "zp-澤口-random",
     "zp-翟-random", "zp-髙森-random", "さくらいしょうrandam", "遺伝志テスト対策",
     "遺伝志発信チャンネル", "気づきtips-giveチャンネル", "山田悠斗_遺伝志発信channel"
