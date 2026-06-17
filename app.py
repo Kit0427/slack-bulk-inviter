@@ -36,7 +36,7 @@ def kwargs_lazy(respond, command):
     if match:
         target_user_id = match.group(1)
     else:
-        respond("⚠️ エラー: 招待したいメンバーをメンションで指定してください（例: `/bulk-invite @名前`）")
+        respond(f"⚠️ エラー: 招待したいメンバーをメンション（青いハイライト）で指定してください。\n（プログラムに届いた文字: `{text}`）")
         return
 
     respond(f"🏃‍♂️ <@{target_user_id}> を対象チャンネルへ一括招待しています...少しお待ちください。")
