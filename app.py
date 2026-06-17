@@ -9,12 +9,13 @@ app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
-# 招待自体は権限の強いあなたのユーザーアカウント(xoxp)で実行する
+# 招待自体は権限の強いユーザーアカウント(xoxp)で実行
 user_client = WebClient(token=os.environ.get("SLACK_USER_TOKEN"))
 
 # 対象チャンネルのリスト
 TARGET_CHANNELS = [
-    "27卒-hr稼働者チャンネル", "27卒member-all", "27卒pitch会", "27卒シラバス共有チャンネル", "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
+    "27卒-hr稼働者チャンネル", "27卒member-all", "27卒pitch会", "27卒シラバス共有チャンネル",
+    "27卒関東勢", "27卒懇親会", "27卒掃除当番", "27卒朝会準備担当",
     "80_左野random", "99_random", "general", "giver宣言発信チャンネル",
     "info_共有", "info_重要事項連絡", "tmp-expo参加者", "t進ハイスクール",
     "zp-石田-random", "zp-中谷random", "zp-木村-random", "zp-澤口-random",
@@ -22,15 +23,15 @@ TARGET_CHANNELS = [
     "遺伝志発信チャンネル", "気づきtips-giveチャンネル", "山田悠斗_遺伝志発信channel"
 ]
 
-@app.command("/bulk-invite")
-def handle_bulk_invite(ack, respond, command):
-    # Slackへ「コマンド受け付けたよ」と3秒以内に返事をする（必須ルール）
+# 1. 【3秒ルール対策】Slackに「受け取ったよ」と一瞬で即レスを返す関数
+def kwargs_ack(ack):
     ack()
-    
-    # ユーザーが入力した文字（例： @名前）を取得
+
+# 2. 【重い処理】バックグラウンド（裏側）で時間をかけて実行する関数
+def kwargs_lazy(respond, command):
     text = command.get("text", "").strip()
     
-    # 入力からユーザーID（Uから始まる文字列）だけを綺麗に抜き出す
+    # 入力からユーザーIDを抜き出す
     match = re.search(r'<@(U[A-Z0-9]+)\|', text)
     if match:
         target_user_id = match.group(1)
@@ -70,7 +71,11 @@ def handle_bulk_invite(ack, respond, command):
 
     respond(f"✅ 完了しました！\n新しく招待成功: {success_count} チャンネル\n参加済みスキップ: {skip_count} チャンネル")
 
-# クラウド上で外部からの通信を受け取れるようにする設定
-# 修正後
+# Slack Boltに「即レス用」と「裏での処理用」の関数をセットする
+app.command("/bulk-invite")(
+    ack=kwargs_ack,
+    lazy=[kwargs_lazy]
+)
+
 if __name__ == "__main__":
     app.start(port=int(os.environ.get("PORT", 3000)))
